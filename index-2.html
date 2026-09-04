@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0820">
+<title>Multiverse Bid Battle Arena</title>
+<style>
+:root{
+ --panel:rgba(20,17,44,.93);--card:rgba(34,28,70,.95);--text:#fff;--muted:#c9c4df;
+ --border:rgba(255,255,255,.16);--cyan:#62e8ff;--pink:#ff5bad;--purple:#8c6cff;
+ --gold:#ffd564;--green:#68e1a6;--red:#ff6f88;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);
+background:
+ radial-gradient(circle at 15% 10%,rgba(98,232,255,.16),transparent 24%),
+ radial-gradient(circle at 86% 15%,rgba(255,91,173,.19),transparent 24%),
+ radial-gradient(circle at 50% 95%,rgba(140,108,255,.25),transparent 33%),
+ linear-gradient(160deg,#080610,#171133 52%,#080610);}
+body:before{content:"⚡ 🦸 👿 🌀 🥷 🦹 ✨ ⚔️ 🛡️ 💥 🐉 🔥";position:fixed;inset:-8%;font-size:45px;line-height:2.35;letter-spacing:18px;opacity:.055;transform:rotate(-7deg);pointer-events:none}
+button,input{font:inherit}button{touch-action:manipulation;cursor:pointer}
+.app{position:relative;z-index:1;max-width:780px;margin:auto;padding:9px 9px calc(22px + env(safe-area-inset-bottom))}
+.box{border:1px solid var(--border);border-radius:18px;background:var(--panel);backdrop-filter:blur(11px);box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero{padding:14px;background:
+ radial-gradient(circle at 88% 8%,rgba(255,91,173,.25),transparent 28%),
+ radial-gradient(circle at 10% 22%,rgba(98,232,255,.17),transparent 25%),
+ linear-gradient(135deg,rgba(36,24,74,.96),rgba(61,21,75,.95))}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)}
+h1{font-size:22px;margin:3px 0 4px}p{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{min-height:45px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:#fff;font-weight:850;padding:0 12px}
+.primary{border:0;background:linear-gradient(135deg,var(--cyan),var(--purple) 48%,var(--pink))}
+.gold{border:0;background:linear-gradient(135deg,#f09d4f,#ff5f95)}
+.input{width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;background:#151124;color:#fff;padding:0 11px;outline:none}
+.lobby,.auction,.battle{padding:11px;margin-top:8px}
+.room{margin-top:9px;padding:10px;border:1px dashed rgba(255,213,100,.4);border-radius:13px;background:rgba(255,213,100,.055)}
+.code{font-size:18px;font-weight:950;letter-spacing:.1em;color:var(--gold);word-break:break-all}
+.status{font-size:11px;color:var(--muted);margin-top:7px;min-height:16px}
+.players{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}
+.player{padding:9px}.player.me{border-color:rgba(98,232,255,.45)}
+.pname{font-size:12px;font-weight:900}.budget{font-size:14px;color:var(--gold);font-weight:950}
+.team{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px;min-height:20px}
+.chip{font-size:8px;padding:3px 5px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.05)}
+.current{margin-top:8px;border:1px solid rgba(255,255,255,.18);border-radius:17px;overflow:hidden;background:#1c1737}
+.portrait{height:235px;position:relative;background:linear-gradient(150deg,var(--a),var(--b));overflow:hidden}
+.portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%;display:none}
+.portrait.loaded img{display:block}
+.portrait:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 44%,rgba(5,4,12,.93) 100%)}
+.symbol{position:absolute;left:50%;top:44px;transform:translateX(-50%);font-size:62px}
+.info{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:12px}
+.fighter{font-size:25px;font-weight:1000;text-shadow:0 3px 12px #000}
+.meta{font-size:10px;color:#ddd7e9}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:9px}
+.stat{text-align:center;font-size:11px;font-weight:800;border:1px solid var(--border);border-radius:9px;padding:7px 2px;background:rgba(255,255,255,.04)}
+.money{display:flex;align-items:center;border:1px solid var(--border);border-radius:12px;background:#151124;overflow:hidden;margin-top:5px}
+.money span{padding-left:12px;color:var(--gold);font-size:23px;font-weight:950}.money input{width:100%;min-height:51px;border:0;background:transparent;color:#fff;font-size:23px;font-weight:950;text-align:center;outline:none}
+.locked{background:var(--green)!important;color:#111!important}.hide{display:none!important}
+.history{display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none}.sale{min-width:145px;border:1px solid var(--border);border-radius:11px;padding:8px;background:rgba(255,255,255,.04);font-size:10px}.sale b{display:block;font-size:12px}
+.result{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.05);font-size:12px}
+
+/* Battle arena */
+.arenaWrap{margin-top:9px}
+.arena{position:relative;height:320px;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.18);
+background:
+ radial-gradient(circle at 50% 5%,rgba(255,255,255,.12),transparent 22%),
+ linear-gradient(180deg,#1a1640 0%,#24164e 55%,#0d0b22 56%,#0a0918 100%);
+}
+.arena:before{content:"";position:absolute;left:0;right:0;bottom:55px;height:2px;background:linear-gradient(90deg,transparent,#716b9d,transparent);opacity:.7}
+.arenaFlash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.9),rgba(136,90,255,.25) 25%,transparent 55%)}
+.arenaFlash.fire{animation:flash .45s ease}.fighterSide{position:absolute;bottom:64px;width:42%;display:flex;flex-direction:column;align-items:center;transition:transform .35s ease}
+.fighterSide.left{left:2%}.fighterSide.right{right:2%}
+.avatar{position:relative;width:122px;height:150px;border-radius:18px;overflow:hidden;border:2px solid rgba(255,255,255,.2);background:linear-gradient(150deg,var(--a),var(--b));box-shadow:0 14px 28px rgba(0,0,0,.35)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:none}.avatar.loaded img{display:block}.avatar .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:58px}
+.nameTag{font-size:12px;font-weight:950;margin-top:5px;text-align:center}
+.hpbar{width:100%;height:13px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:#16131f;overflow:hidden;margin-top:4px}.hpfill{height:100%;width:100%;background:linear-gradient(90deg,#69e2a7,#a4f078);transition:width .45s ease}
+.fx{position:absolute;z-index:5;font-size:42px;opacity:0;pointer-events:none}.fx.show{animation:projectile .65s ease}
+.fighterSide.attackLeft{animation:lungeLeft .48s ease}.fighterSide.attackRight{animation:lungeRight .48s ease}.fighterSide.hit{animation:hit .4s ease}.fighterSide.ko{animation:ko .75s ease forwards}
+.battleText{position:absolute;left:10px;right:10px;top:10px;text-align:center;font-weight:950;font-size:15px;text-shadow:0 2px 8px #000;z-index:7}
+.roundBadge{position:absolute;left:50%;top:38px;transform:translateX(-50%);font-size:10px;color:var(--gold);font-weight:900;z-index:7}
+.commentary{margin-top:8px;min-height:44px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.045);padding:9px;font-size:11px;color:#e5e1f2}
+.podium{margin-top:8px;display:grid;gap:6px}.pod{border:1px solid var(--border);border-radius:11px;padding:8px;background:rgba(255,255,255,.04);font-size:12px}
+@keyframes lungeLeft{0%,100%{transform:translateX(0)}50%{transform:translateX(48px) scale(1.05)}}
+@keyframes lungeRight{0%,100%{transform:translateX(0)}50%{transform:translateX(-48px) scale(1.05)}}
+@keyframes hit{0%,100%{filter:none}35%{filter:brightness(2);transform:translateX(8px)}65%{transform:translateX(-8px)}}
+@keyframes ko{to{transform:translateY(55px) rotate(12deg);opacity:.15}}
+@keyframes flash{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+@keyframes projectile{0%{opacity:0;transform:translateX(0) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translateX(var(--travel)) scale(1.4)}}
+.footer{text-align:center;font-size:9px;color:#9a92b4;margin-top:10px}
+@media(min-width:620px){.players{grid-template-columns:repeat(4,1fr)}}@media(max-width:390px){.portrait{height:210px}.fighter{font-size:22px}.arena{height:300px}.avatar{width:104px;height:136px}.app{padding:7px}}
+@media(prefers-reduced-motion:reduce){.fighterSide,.fx,.arenaFlash{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="hero box">
+ <div class="eyebrow">Online · 2–4 players · animated final battle</div>
+ <h1>⚡ Multiverse Bid Battle Arena</h1>
+ <p>Everyone starts with £20, secretly bids on the same fighters, builds a team of up to 5, then watches the teams fight it out.</p>
+</section>
+
+<section id="lobby" class="lobby box">
+ <div class="eyebrow">Your player name</div>
+ <input id="playerName" class="input" maxlength="18" value="Player">
+ <div class="grid2" style="margin-top:8px">
+  <button id="createBtn" class="btn primary">CREATE GAME</button>
+  <button id="joinBtn" class="btn">JOIN FROM LINK</button>
+ </div>
+ <div id="roomBox" class="room hide">
+  <div class="row between">
+   <div><div class="eyebrow">Room</div><div id="roomCode" class="code">----</div></div>
+   <button id="shareBtn" class="btn">SHARE INVITE</button>
+  </div>
+  <div id="inviteText" class="status">Waiting for players…</div>
+ </div>
+ <div id="hostControls" class="hide" style="margin-top:8px">
+  <button id="startBtn" class="btn gold" style="width:100%">START AUCTION</button>
+  <div class="status">Host can start with 2–4 players.</div>
+ </div>
+ <div id="lobbyStatus" class="status">Create a game or open an invitation link.</div>
+</section>
+
+<section id="game" class="hide">
+ <div id="players" class="players"></div>
+
+ <section class="auction box">
+  <div class="row between">
+   <div><div class="eyebrow">Live auction</div><div id="roundTitle" style="font-weight:900">Waiting to start</div></div>
+   <div id="netStatus" class="status">Connected</div>
+  </div>
+  <div id="current" class="current"><div style="padding:20px"><div class="fighter">Waiting for host…</div></div></div>
+  <div id="bidArea" class="hide" style="margin-top:9px">
+   <div class="eyebrow">Your secret bid · remaining <span id="budgetHint">£20</span></div>
+   <div class="money"><span>£</span><input id="bid" type="number" min="0" max="20" value="0" inputmode="numeric"></div>
+   <button id="lockBid" class="btn primary" style="width:100%;margin-top:7px">LOCK MY BID</button>
+   <div id="bidStatus" class="status">Other players cannot see your amount until everyone locks.</div>
+  </div>
+  <div id="roundResult" class="result hide"></div>
+  <div id="history" class="history"></div>
+ </section>
+
+ <section class="battle box">
+  <button id="battleBtn" class="btn gold" style="width:100%">⚔️ START ANIMATED FINAL BATTLE</button>
+  <div id="arenaWrap" class="arenaWrap hide">
+   <div class="arena">
+    <div id="battleText" class="battleText">Battle ready</div>
+    <div id="roundBadge" class="roundBadge"></div>
+    <div id="flash" class="arenaFlash"></div>
+    <div id="leftF" class="fighterSide left"></div>
+    <div id="rightF" class="fighterSide right"></div>
+    <div id="fx" class="fx">⚡</div>
+   </div>
+   <div id="commentary" class="commentary"></div>
+   <div id="podium" class="podium"></div>
+  </div>
+ </section>
+</section>
+
+<div class="footer">Fan-made prototype · £20 is in-game budget only · maximum 4 players · character pictures load online where available</div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script>
+(()=>{
+const roster=[
+['Spider-Man','Marvel','Hero',7,9,6,8,5,'agile','🕷️','#7d1f2d','#13284a'],
+['Thor','Marvel','Hero',10,7,9,6,10,'cosmic','⚡','#273a75','#5b6eb8'],
+['Iron Man','Marvel','Hero',8,7,8,10,9,'tech','🤖','#7b2028','#a34a28'],
+['Hulk','Marvel','Hero',10,6,10,4,3,'brute','💥','#1f5b34','#51386d'],
+['Scarlet Witch','Marvel','Antihero',9,6,6,8,10,'magic','🔮','#5f1530','#872348'],
+['Thanos','Marvel','Villain',10,6,10,9,9,'cosmic','🟣','#46325f','#74573c'],
+['Doctor Doom','Marvel','Villain',8,5,9,10,10,'techmagic','👑','#314239','#5b6570'],
+['Deadpool','Marvel','Antihero',6,7,10,6,4,'chaos','⚔️','#641e29','#24242c'],
+['Superman','DC','Hero',10,10,10,7,7,'cosmic','🛡️','#183b78','#7d202c'],
+['Batman','DC','Hero',5,6,6,10,9,'tech','🦇','#11131c','#34384a'],
+['Wonder Woman','DC','Hero',9,9,9,8,8,'warrior','⭐','#7c2431','#2e477e'],
+['The Flash','DC','Hero',7,10,6,7,8,'speed','⚡','#8d2026','#bc6622'],
+['Darkseid','DC','Villain',10,7,10,9,10,'cosmic','👿','#26304a','#533d5c'],
+['Joker','DC','Villain',3,5,4,10,5,'chaos','🃏','#334c2a','#5a315e'],
+['Raven','DC','Hero',8,6,7,8,10,'magic','🔮','#2b244f','#51305d'],
+['Deathstroke','DC','Villain',7,8,8,9,6,'warrior','🎯','#263447','#8a4e24'],
+['Goku','Anime','Hero',10,10,9,6,10,'cosmic','🐉','#c75f22','#274a82'],
+['Vegeta','Anime','Antihero',10,9,9,7,9,'cosmic','💢','#263f79','#d9d7d2'],
+['Naruto','Anime','Hero',9,9,8,8,9,'magic','🍥','#dc722c','#252d45'],
+['Sasuke','Anime','Antihero',9,9,8,9,9,'magic','👁️','#242b54','#59334b'],
+['Saitama','Anime','Hero',10,10,10,6,5,'brute','👊','#d0a52c','#7b272e'],
+['All Might','Anime','Hero',9,8,8,7,5,'brute','💪','#2e4f83','#b03832'],
+['Darth Vader','Movies','Villain',8,6,8,9,9,'magic','🌌','#15151b','#351d22'],
+['Neo','Movies','Hero',8,9,7,9,8,'tech','🕶️','#18352a','#101319']
+].map((x,id)=>({id,n:x[0],u:x[1],r:x[2],p:x[3],s:x[4],d:x[5],i:x[6],x:x[7],tag:x[8],symbol:x[9],a:x[10],b:x[11]}));
+const wiki={'Spider-Man':'Spider-Man','Thor':'Thor_(Marvel_Comics)','Iron Man':'Iron_Man','Hulk':'Hulk','Scarlet Witch':'Scarlet_Witch','Thanos':'Thanos','Doctor Doom':'Doctor_Doom','Deadpool':'Deadpool','Superman':'Superman','Batman':'Batman','Wonder Woman':'Wonder_Woman','The Flash':'Flash_(DC_Comics_character)','Darkseid':'Darkseid','Joker':'Joker_(character)','Raven':'Raven_(DC_Comics)','Deathstroke':'Deathstroke','Goku':'Goku','Vegeta':'Vegeta','Naruto':'Naruto_Uzumaki','Sasuke':'Sasuke_Uchiha','Saitama':'Saitama_(One-Punch_Man)','All Might':'All_Might','Darth Vader':'Darth_Vader','Neo':'Neo_(The_Matrix)'};
+
+const $=s=>document.querySelector(s);
+let peer,roomId='',isHost=false,myId='',state=null,connections=new Map(),hostConn=null,portraitToken=0,battleRunning=false;
+const pname=()=>($('#playerName').value.trim()||'Player').slice(0,18);
+const roomFromUrl=()=>new URLSearchParams(location.search).get('room')||'';
+function inviteUrl(){let u=new URL(location.href);u.search='';u.searchParams.set('room',roomId);return u.toString()}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function makeState(){return{started:false,players:[],order:shuffle(roster.map(x=>x.id).slice()),idx:0,bids:{},locked:{},history:[],finished:false,roundMessage:'Waiting for host to start.',battleSeed:0}}
+function broadcast(){render();for(const c of connections.values())if(c.open)c.send({type:'state',payload:state})}
+function createGame(){
+ isHost=true;state=makeState();$('#lobbyStatus').textContent='Creating room…';peer=new Peer();
+ peer.on('open',id=>{myId=id;roomId=id;state.players=[{id,name:pname(),budget:20,team:[],connected:true}];$('#roomCode').textContent=id.slice(0,8).toUpperCase();$('#roomBox').classList.remove('hide');$('#hostControls').classList.remove('hide');$('#lobbyStatus').textContent='Room created. Invite up to 3 friends.';history.replaceState({},'',inviteUrl());showGame();render()});
+ peer.on('connection',acceptConnection);peer.on('error',e=>$('#lobbyStatus').textContent='Connection error: '+e.type)
+}
+function acceptConnection(c){
+ if(state.started||state.players.length>=4){c.on('open',()=>c.send({type:'reject',payload:state.started?'Game already started.':'Room is full.'}));return}
+ connections.set(c.peer,c);c.on('data',m=>hostHandle(c,m));c.on('close',()=>{let p=state.players.find(x=>x.id===c.peer);if(p)p.connected=false;broadcast()})
+}
+function hostHandle(c,m){
+ if(m.type==='hello'){if(state.players.some(p=>p.id===c.peer))return;state.players.push({id:c.peer,name:(m.payload.name||'Player').slice(0,18),budget:20,team:[],connected:true});$('#inviteText').textContent=state.players.length+'/4 players joined.';broadcast()}
+ if(m.type==='bid')receiveBid(c.peer,m.payload.value);
+ if(m.type==='battle')startAnimatedBattle();
+}
+function joinGame(){
+ roomId=roomFromUrl();if(!roomId){$('#lobbyStatus').textContent='No room code found in this invitation link.';return}
+ isHost=false;peer=new Peer();peer.on('open',id=>{myId=id;hostConn=peer.connect(roomId,{reliable:true});
+ hostConn.on('open',()=>{hostConn.send({type:'hello',payload:{name:pname()}});$('#lobbyStatus').textContent='Connected. Waiting for host.'});
+ hostConn.on('data',m=>{if(m.type==='state'){let oldSeed=state?.battleSeed||0;state=m.payload;showGame();render();if(state.battleSeed&&state.battleSeed!==oldSeed)startAnimatedBattle(true)}if(m.type==='reject')$('#lobbyStatus').textContent=m.payload});
+ hostConn.on('close',()=>$('#netStatus').textContent='Host disconnected')})}
+function showGame(){$('#game').classList.remove('hide');$('#roomBox').classList.remove('hide')}
+async function share(){let data={title:'Multiverse Bid Battle Arena',text:'Join my Multiverse Bid Battle! Up to 4 players, £20 each.',url:inviteUrl()};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(inviteUrl());$('#inviteText').textContent='Invite link copied!'}}catch(e){}}
+function startGame(){if(!isHost||state.players.filter(p=>p.connected!==false).length<2){$('#lobbyStatus').textContent='You need at least 2 players to start.';return}state.started=true;state.roundMessage='Auction started! Everyone choose a secret bid.';$('#hostControls').classList.add('hide');broadcast()}
+function current(){return state&&state.started&&!state.finished?roster[state.order[state.idx]]:null}
+function loadPortrait(c,imgSel='#charImg',boxSel='#portrait'){let token=++portraitToken,img=$(imgSel),box=$(boxSel);if(!img||!box)return;fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(wiki[c.n]||c.n.replace(/\s+/g,'_'))).then(r=>r.json()).then(d=>{if(token!==portraitToken)return;let u=(d.originalimage&&d.originalimage.source)||(d.thumbnail&&d.thumbnail.source);if(u){img.onload=()=>box.classList.add('loaded');img.src=u}}).catch(()=>{})}
+function render(){
+ if(!state)return;let me=state.players.find(p=>p.id===myId),active=state.players.filter(p=>p.connected!==false);
+ $('#players').innerHTML=state.players.map(p=>`<div class="player box ${p.id===myId?'me':''}"><div class="row between"><div class="pname">${p.name}${p.id===myId?' (You)':''}</div><div class="budget">£${p.budget}</div></div><div class="team">${p.team.length?p.team.map(id=>`<span class="chip">${roster[id].n}</span>`).join(''):'<span class="meta">No fighters</span>'}</div></div>`).join('');
+ $('#inviteText').textContent=state.players.length+'/4 players in room.';
+ $('#roundTitle').textContent=!state.started?'Waiting to start':state.finished?'Auction complete':'Round '+(state.idx+1);
+ $('#bidArea').classList.toggle('hide',!state.started||state.finished);
+ let c=current();
+ if(c){$('#current').innerHTML=`<div id="portrait" class="portrait" style="--a:${c.a};--b:${c.b}"><img id="charImg" alt="${c.n}"><div class="symbol">${c.symbol}</div><div class="info"><div class="fighter">${c.n}</div><div class="meta">${c.u} · ${c.r}</div></div></div><div class="stats"><div class="stat">💥 ${c.p}</div><div class="stat">⚡ ${c.s}</div><div class="stat">🛡 ${c.d}</div><div class="stat">🧠 ${c.i}</div><div class="stat">✨ ${c.x}</div></div>`;loadPortrait(c)}
+ else if(state.finished)$('#current').innerHTML='<div style="padding:20px"><div class="fighter">Auction finished</div><div class="meta">Start the animated final battle below.</div></div>';
+ if(me){$('#budgetHint').textContent='£'+me.budget;$('#bid').max=me.budget;let l=!!state.locked[myId];$('#bid').disabled=l||me.team.length>=5||state.finished;$('#lockBid').disabled=l||me.team.length>=5||state.finished;$('#lockBid').classList.toggle('locked',l);$('#lockBid').textContent=l?'✓ BID LOCKED':'LOCK MY BID';let lockedCount=active.filter(p=>state.locked[p.id]).length;$('#bidStatus').textContent=l?`Bid locked. ${lockedCount}/${active.length} ready.`:`${lockedCount}/${active.length} players have locked.`}
+ $('#roundResult').classList.toggle('hide',!state.roundMessage);$('#roundResult').textContent=state.roundMessage||'';
+ $('#history').innerHTML=state.history.length?state.history.slice().reverse().slice(0,8).map(h=>`<div class="sale"><b>${h.char}</b>${h.text}</div>`).join(''):'';
+}
+function lockBid(){if(!state||!state.started)return;let me=state.players.find(p=>p.id===myId);let v=Math.max(0,Math.min(me.budget,Math.floor(Number($('#bid').value)||0)));$('#bid').value=v;if(isHost)receiveBid(myId,v);else hostConn.send({type:'bid',payload:{value:v}})}
+function receiveBid(id,v){
+ if(!isHost||state.locked[id])return;let p=state.players.find(x=>x.id===id);if(!p||p.team.length>=5)return;
+ v=Math.max(0,Math.min(p.budget,Math.floor(Number(v)||0)));state.bids[id]=v;state.locked[id]=true;state.roundMessage=p.name+' locked a bid.';broadcast();
+ let eligible=state.players.filter(p=>p.connected!==false&&p.team.length<5);
+ if(eligible.every(p=>state.locked[p.id]))setTimeout(resolveRound,900)
+}
+function resolveRound(){
+ let c=current(),eligible=state.players.filter(p=>p.connected!==false&&p.team.length<5);if(!c||!eligible.length)return;
+ let vals=eligible.map(p=>({p,v:state.bids[p.id]??0})),max=Math.max(...vals.map(x=>x.v)),top=vals.filter(x=>x.v===max);
+ if(max===0){state.history.push({char:c.n,text:'Everyone bid £0 — no sale'});return advance('Everyone passed on '+c.n+'.')}
+ if(top.length>1){let tied=new Set(top.map(x=>x.p.id));state.bids={};state.locked={};for(let p of eligible)if(!tied.has(p.id)){state.locked[p.id]=true;state.bids[p.id]=-1}state.roundMessage='Tie at £'+max+' between '+top.map(x=>x.p.name).join(', ')+' — tied players rebid!';broadcast();return}
+ let w=top[0].p;w.budget-=max;w.team.push(c.id);state.history.push({char:c.n,text:w.name+' wins for £'+max});advance(w.name+' wins '+c.n+' for £'+max+'!')
+}
+function advance(msg){state.idx++;state.bids={};state.locked={};state.roundMessage=msg;let can=state.players.filter(p=>p.connected!==false&&p.team.length<5&&p.budget>0);if(state.idx>=state.order.length||can.length<1||state.players.every(p=>p.team.length>=5))state.finished=true;broadcast()}
+
+/* Animated combat */
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function maxHp(c){return 70+c.d*5+c.p*2}
+function attackPower(c){return c.p*2.1+c.x*1.6+c.s*.7}
+function defence(c){return c.d*1.25+c.i*.25}
+function moveName(c){
+ if(c.tag==='magic'||c.tag==='techmagic')return 'mystic blast';
+ if(c.tag==='cosmic')return 'cosmic strike';
+ if(c.tag==='tech')return 'energy weapon';
+ if(c.tag==='speed'||c.tag==='agile')return 'speed combo';
+ if(c.tag==='brute')return 'power smash';
+ if(c.tag==='warrior')return 'combat strike';
+ if(c.tag==='chaos')return 'chaos attack';
+ return 'special attack';
+}
+function moveIcon(c){
+ if(c.tag==='magic'||c.tag==='techmagic')return '🔮';
+ if(c.tag==='cosmic')return '✨';
+ if(c.tag==='tech')return '⚡';
+ if(c.tag==='speed'||c.tag==='agile')return '💨';
+ if(c.tag==='brute')return '💥';
+ if(c.tag==='warrior')return '⚔️';
+ if(c.tag==='chaos')return '🌀';
+ return '💫';
+}
+function fighterHtml(c,hp,max,side){
+ return `<div class="avatar" id="${side}Avatar" style="--a:${c.a};--b:${c.b}"><div class="fallback">${c.symbol}</div><img id="${side}Img" alt="${c.n}"></div><div class="nameTag">${c.n}</div><div class="hpbar"><div id="${side}Hp" class="hpfill" style="width:${Math.max(0,hp/max*100)}%"></div></div>`;
+}
+async function battleLoadImage(c,side){
+ let box=$('#'+side+'Avatar'),img=$('#'+side+'Img');if(!box||!img)return;
+ try{let d=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(wiki[c.n]||c.n.replace(/\s+/g,'_'))).then(r=>r.json());let u=(d.originalimage&&d.originalimage.source)||(d.thumbnail&&d.thumbnail.source);if(u){img.onload=()=>box.classList.add('loaded');img.src=u}}catch(e){}
+}
+async function animateHit(attackerSide,defenderSide,c,damage){
+ let atk=$('#'+attackerSide+'F'),def=$('#'+defenderSide+'F'),fx=$('#fx'),flash=$('#flash');
+ atk.classList.remove('attackLeft','attackRight');void atk.offsetWidth;atk.classList.add(attackerSide==='left'?'attackLeft':'attackRight');
+ fx.textContent=moveIcon(c);fx.style.left=attackerSide==='left'?'33%':'62%';fx.style.top='125px';fx.style.setProperty('--travel',attackerSide==='left'?'120px':'-120px');fx.classList.remove('show');void fx.offsetWidth;fx.classList.add('show');
+ flash.classList.remove('fire');void flash.offsetWidth;flash.classList.add('fire');
+ await wait(300);def.classList.add('hit');await wait(380);def.classList.remove('hit')
+}
+function seededRand(seedObj){seedObj.v=(seedObj.v*1664525+1013904223)>>>0;return seedObj.v/4294967296}
+async function duel(playerA,playerB,cA,cB,seedObj,roundNum){
+ let hpA=maxHp(cA),hpB=maxHp(cB),maxA=hpA,maxB=hpB;
+ $('#leftF').className='fighterSide left';$('#rightF').className='fighterSide right';
+ $('#leftF').innerHTML=fighterHtml(cA,hpA,maxA,'left');$('#rightF').innerHTML=fighterHtml(cB,hpB,maxB,'right');
+ battleLoadImage(cA,'left');battleLoadImage(cB,'right');
+ $('#battleText').textContent=playerA.name+' vs '+playerB.name;$('#roundBadge').textContent='FIGHT '+roundNum;
+ $('#commentary').textContent=`${cA.n} faces ${cB.n}.`;
+ await wait(900);
+ let turn=cA.s>=cB.s?0:1,steps=0;
+ while(hpA>0&&hpB>0&&steps<20){
+   let atk=turn===0?cA:cB,def=turn===0?cB:cA;
+   let crit=seededRand(seedObj)<(.08+atk.x*.008);
+   let variance=.88+seededRand(seedObj)*.28;
+   let dmg=Math.max(6,Math.round((attackPower(atk)-defence(def)*.55)*variance*(crit?1.55:1)));
+   $('#commentary').textContent=`${atk.n} uses ${moveName(atk)}${crit?' — CRITICAL HIT!':''}`;
+   await animateHit(turn===0?'left':'right',turn===0?'right':'left',atk,dmg);
+   if(turn===0){hpB=Math.max(0,hpB-dmg);$('#rightHp').style.width=(hpB/maxB*100)+'%'}else{hpA=Math.max(0,hpA-dmg);$('#leftHp').style.width=(hpA/maxA*100)+'%'}
+   await wait(520);turn=1-turn;steps++;
+ }
+ let winA=hpA>hpB,winner=winA?{player:playerA,c:cA,hp:hpA,max:maxA}:{player:playerB,c:cB,hp:hpB,max:maxB};
+ let loserSide=winA?'right':'left';$('#'+loserSide+'F').classList.add('ko');$('#commentary').textContent=`💥 ${winA?cB.n:cA.n} is KO! ${winner.c.n} wins the fight.`;
+ await wait(1000);return winner;
+}
+async function startAnimatedBattle(remote=false){
+ if(battleRunning||!state)return;
+ if(isHost&&!remote){if(state.players.filter(p=>p.team.length).length<2){alert('At least 2 players need fighters.');return}state.battleSeed=Date.now()%2147483647;broadcast()}
+ battleRunning=true;$('#arenaWrap').classList.remove('hide');$('#podium').innerHTML='';$('#battleText').textContent='Preparing battle…';$('#commentary').textContent='Loading fighters…';
+ let seedObj={v:state.battleSeed||123456789};
+ let contestants=state.players.filter(p=>p.team.length).map(p=>({player:p,queue:p.team.slice()}));
+ let eliminated=[],round=1;
+ while(contestants.length>1){
+   let A=contestants.shift(),B=contestants.shift();
+   if(!B){contestants.push(A);break}
+   $('#commentary').textContent=`${A.player.name} vs ${B.player.name}`;
+   while(A.queue.length&&B.queue.length){
+      let idA=A.queue[0],idB=B.queue[0];
+      let res=await duel(A.player,B.player,roster[idA],roster[idB],seedObj,round++);
+      if(res.player.id===A.player.id)B.queue.shift();else A.queue.shift();
+      await wait(500)
+   }
+   let winner=A.queue.length?A:B,loser=A.queue.length?B:A;
+   eliminated.push(loser.player);contestants.push(winner);
+   $('#commentary').textContent=`🏆 ${winner.player.name} advances!`;
+   await wait(1000)
+ }
+ let champ=contestants[0]?.player;if(champ){
+   $('#battleText').textContent='🏆 '+champ.name+' — MULTIVERSE CHAMPION';
+   let ranking=[champ,...eliminated.reverse()];
+   $('#podium').innerHTML=ranking.map((p,i)=>`<div class="pod">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'4️⃣'} <b>${p.name}</b></div>`).join('');
+   $('#commentary').textContent=`${champ.name} is the last team standing!`;
+ }
+ battleRunning=false
+}
+function requestBattle(){if(isHost)startAnimatedBattle(false);else hostConn.send({type:'battle'})}
+
+$('#createBtn').onclick=createGame;$('#joinBtn').onclick=joinGame;$('#shareBtn').onclick=share;$('#startBtn').onclick=startGame;$('#lockBid').onclick=lockBid;$('#battleBtn').onclick=requestBattle;
+if(roomFromUrl()){$('#joinBtn').textContent='JOIN FRIENDS';$('#lobbyStatus').textContent='Invitation detected. Enter your name and tap JOIN FRIENDS.'}
+})();
+</script>
+</body>
+</html>
